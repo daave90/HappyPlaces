@@ -7,4 +7,10 @@
     <string name="location_hint">Loaction</string>
     <string name="save">Save</string>
     <string name="text_add_image">Tap to add image</string>
+    <string name="selectAction">Select Action</string>
+    <string name="selectFromGallery">Select photo from gallery</string>
+    <string name="CaptureFromCamera">Capture photo from camera</string>
+    <string name="permissionAlertMessage">It looks like you have turned of permissions required for this feature. It can be enabled in application settings</string>
+    <string name="goToSettings">GO TO SETTINGS</string>
+    <string name="Cancel">Cancel</string>
 </resources>

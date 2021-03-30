@@ -1,11 +1,24 @@
 package pl.daveproject.happyplaces
 
+import android.Manifest
+import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.Toolbar
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,6 +40,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             }
 
         findViewById<AppCompatEditText>(R.id.etDate).setOnClickListener(this)
+        findViewById<TextView>(R.id.tv_add_image).setOnClickListener(this)
     }
 
     private fun createToolbarWithBackButton() {
@@ -43,7 +57,73 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v!!.id) {
             R.id.etDate -> displayDatePicker()
+            R.id.tv_add_image -> displayPictureDialog()
         }
+    }
+
+    private fun displayPictureDialog() {
+        val pictureDialog = AlertDialog.Builder(this)
+        pictureDialog.setTitle(resources.getString(R.string.selectAction))
+        val pictureDialogItems = arrayOf(
+            resources.getString(R.string.selectFromGallery),
+            resources.getString(R.string.CaptureFromCamera)
+        )
+        pictureDialog.setItems(pictureDialogItems) { dialog, which ->
+            when (which) {
+                0 -> checkPermissionsAndChoosePhotoFromGallery()
+                1 -> Toast.makeText(
+                    this@AddHappyPlaceActivity,
+                    "Camera selection coming soon...",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+        pictureDialog.show()
+    }
+
+    private fun checkPermissionsAndChoosePhotoFromGallery() {
+        Dexter.withContext(this).withPermissions(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ).withListener(object : MultiplePermissionsListener {
+
+            override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                if (report!!.areAllPermissionsGranted()) {
+                    Toast.makeText(
+                        this@AddHappyPlaceActivity,
+                        "All permission are granted",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(
+                permissions: MutableList<PermissionRequest>,
+                token: PermissionToken
+            ) {
+                showRationalDialogForPermissions()
+            }
+
+        })
+            .onSameThread()
+            .check()
+    }
+
+    private fun showRationalDialogForPermissions() {
+        AlertDialog.Builder(this).setMessage(resources.getString(R.string.permissionAlertMessage))
+            .setPositiveButton(resources.getString(R.string.goToSettings)) { _, _ ->
+                try {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    val uri = Uri.fromParts("package", packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                }
+            }
+            .setNegativeButton(resources.getString(R.string.Cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }.show()
     }
 
     private fun displayDatePicker() {

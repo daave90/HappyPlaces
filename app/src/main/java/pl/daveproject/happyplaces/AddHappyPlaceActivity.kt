@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -74,11 +75,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         pictureDialog.setItems(pictureDialogItems) { dialog, which ->
             when (which) {
                 0 -> checkPermissionsAndChoosePhotoFromGallery()
-                1 -> Toast.makeText(
-                    this@AddHappyPlaceActivity,
-                    "Camera selection coming soon...",
-                    Toast.LENGTH_LONG
-                ).show()
+                1 -> checkPermissionsAndChoosePhotoFromCamera()
             }
         }
         pictureDialog.show()
@@ -86,27 +83,57 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && resultCode == GALLERY && data != null) {
-            val contentURI = data.data
-            try {
-                val selectedImageBitmap =
-                    MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            if(requestCode == GALLERY) {
+                val contentURI = data.data
+                try {
+                    val selectedImageBitmap =
+                        MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
+                    val imageView = findViewById<AppCompatImageView>(R.id.iv_place_image)
+                    imageView.setImageBitmap(selectedImageBitmap)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(
+                        this@AddHappyPlaceActivity,
+                        "Failed retrieve image from gallery",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else if (requestCode == CAMERA) {
+                val thumbNail = data.extras!!.get("data") as Bitmap
                 val imageView = findViewById<AppCompatImageView>(R.id.iv_place_image)
-                imageView.setImageBitmap(selectedImageBitmap)
-                Toast.makeText(
-                    this@AddHappyPlaceActivity,
-                    "Succeed retrieve image from gallery",
-                    Toast.LENGTH_LONG
-                ).show()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(
-                    this@AddHappyPlaceActivity,
-                    "Failed retrieve image from gallery",
-                    Toast.LENGTH_LONG
-                ).show()
+                imageView.setImageBitmap(thumbNail)
+            } else {
+                throw Exception("No recognize requested code " + requestCode)
             }
         }
+    }
+
+    private fun checkPermissionsAndChoosePhotoFromCamera() {
+        Dexter.withContext(this).withPermissions(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+        ).withListener(object : MultiplePermissionsListener {
+
+            override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                if (report!!.areAllPermissionsGranted()) {
+                    val cameraIntent =
+                        Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    startActivityForResult(cameraIntent, CAMERA)
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(
+                permissions: MutableList<PermissionRequest>,
+                token: PermissionToken
+            ) {
+                showRationalDialogForPermissions()
+            }
+
+        })
+            .onSameThread()
+            .check()
     }
 
     private fun checkPermissionsAndChoosePhotoFromGallery() {
@@ -172,5 +199,6 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         private const val GALLERY = 1
+        private const val CAMERA = 2
     }
 }

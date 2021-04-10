@@ -1,4 +1,4 @@
-package pl.daveproject.happyplaces
+package pl.daveproject.happyplaces.activity
 
 import android.Manifest
 import android.app.Activity
@@ -15,6 +15,7 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -26,9 +27,9 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import pl.daveproject.happyplaces.R
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOError
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,6 +37,9 @@ import java.util.*
 class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private val cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
+    private var saveImageToInternalStorage : Uri? = null
+    private var mLatitude: Double = 0.0
+    private var mLongitude: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +56,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
         findViewById<AppCompatEditText>(R.id.etDate).setOnClickListener(this)
         findViewById<TextView>(R.id.tv_add_image).setOnClickListener(this)
+        findViewById<Button>(R.id.btn_save).setOnClickListener(this)
     }
 
     private fun createToolbarWithBackButton() {
@@ -69,7 +74,12 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         when (v!!.id) {
             R.id.etDate -> displayDatePicker()
             R.id.tv_add_image -> displayPictureDialog()
+            R.id.btn_save -> saveHappyPlaceIntoDatabase()
         }
+    }
+
+    private fun saveHappyPlaceIntoDatabase() {
+
     }
 
     private fun displayPictureDialog() {
@@ -97,8 +107,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     val selectedImageBitmap =
                         MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
                     val imageView = findViewById<AppCompatImageView>(R.id.iv_place_image)
-                    val savedImage = saveImageToInternalStorage(selectedImageBitmap)
-                    Log.e("Saved image: ", "Path :: $savedImage")
+                    saveImageToInternalStorage = saveImageToInternalStorage(selectedImageBitmap)
+                    Log.e("Saved image: ", "Path :: $saveImageToInternalStorage")
                     imageView.setImageBitmap(selectedImageBitmap)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -111,8 +121,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             } else if (requestCode == CAMERA) {
                 val thumbNail = data.extras!!.get("data") as Bitmap
                 val imageView = findViewById<AppCompatImageView>(R.id.iv_place_image)
-                val savedImage = saveImageToInternalStorage(thumbNail)
-                Log.e("Saved image: ", "Path :: $savedImage")
+                saveImageToInternalStorage = saveImageToInternalStorage(thumbNail)
+                Log.e("Saved image: ", "Path :: $saveImageToInternalStorage")
                 imageView.setImageBitmap(thumbNail)
             } else {
                 throw Exception("No recognize requested code " + requestCode)

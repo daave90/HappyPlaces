@@ -1,9 +1,10 @@
-package pl.daveproject.happyplaces
+package pl.daveproject.happyplaces.activity
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import pl.daveproject.happyplaces.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

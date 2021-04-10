@@ -28,6 +28,8 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import pl.daveproject.happyplaces.R
+import pl.daveproject.happyplaces.database.DatabaseHandler
+import pl.daveproject.happyplaces.model.HappyPlace
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -37,7 +39,7 @@ import java.util.*
 class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private val cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
-    private var saveImageToInternalStorage : Uri? = null
+    private var saveImageToInternalStorage: Uri? = null
     private var mLatitude: Double = 0.0
     private var mLongitude: Double = 0.0
 
@@ -79,7 +81,46 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun saveHappyPlaceIntoDatabase() {
+        val etTitle = findViewById<AppCompatEditText>(R.id.etTitle)
+        val etDescription = findViewById<AppCompatEditText>(R.id.etDescription)
+        val etDate = findViewById<AppCompatEditText>(R.id.etDate)
+        val etLocation = findViewById<AppCompatEditText>(R.id.etLocation)
+        when {
+            etTitle.text.isNullOrEmpty() -> {
+                Toast.makeText(this, "Please enter title", Toast.LENGTH_LONG).show()
+            }
+            etDescription.text.isNullOrEmpty() -> {
+                Toast.makeText(this, "Please enter description", Toast.LENGTH_LONG).show()
+            }
+            etLocation.text.isNullOrEmpty() -> {
+                Toast.makeText(this, "Please enter location", Toast.LENGTH_LONG).show()
+            }
+            saveImageToInternalStorage == null -> {
+                Toast.makeText(this, "Please select an image", Toast.LENGTH_LONG).show()
+            }
+            else -> {
+                val happyPlace =
+                    HappyPlace(
+                        0,
+                        etTitle.text.toString(),
+                        saveImageToInternalStorage.toString(),
+                        etDescription.text.toString(),
+                        etDate.text.toString(),
+                        etLocation.text.toString(),
+                        mLatitude,
+                        mLongitude
+                    )
 
+                val dbHandler = DatabaseHandler(this)
+                val result = dbHandler.addHappyPlace(happyPlace)
+                if(result > 0) {
+                    Toast.makeText(this, "Happy place added successfully", Toast.LENGTH_LONG).show()
+                    finish()
+                } else {
+                    Toast.makeText(this, "Cannot save happy place", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun displayPictureDialog() {
@@ -101,7 +142,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
-            if(requestCode == GALLERY) {
+            if (requestCode == GALLERY) {
                 val contentURI = data.data
                 try {
                     val selectedImageBitmap =
@@ -218,17 +259,17 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         dateEditText.setText(sdf.format(cal.time).toString())
     }
 
-    private fun saveImageToInternalStorage(bitmap: Bitmap):Uri {
+    private fun saveImageToInternalStorage(bitmap: Bitmap): Uri {
         val wrapper = ContextWrapper(applicationContext)
         var file = wrapper.getDir(IMAGE_DIRECTORY, Context.MODE_PRIVATE)
         file = File(file, "${UUID.randomUUID()}.jpg")
 
-        try{
+        try {
             val stream = FileOutputStream(file)
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
             stream.flush()
             stream.close()
-        }catch (e: IOException) {
+        } catch (e: IOException) {
             e.printStackTrace()
         }
         return Uri.parse(file.absolutePath)

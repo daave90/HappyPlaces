@@ -2,9 +2,13 @@ package pl.daveproject.happyplaces.database
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import pl.daveproject.happyplaces.model.HappyPlace
+import java.util.*
+import kotlin.collections.ArrayList
 
 class DatabaseHandler(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -17,7 +21,7 @@ class DatabaseHandler(context: Context) :
         private const val KEY_ID = "_id"
         private const val KEY_TITLE = "title"
         private const val KEY_IMAGE = "image"
-        private const val KEY_DESCRIPTION="description"
+        private const val KEY_DESCRIPTION = "description"
         private const val KEY_DATE = "date"
         private const val KEY_LOCATION = "location"
         private const val KEY_LATITUDE = "latitude"
@@ -56,5 +60,36 @@ class DatabaseHandler(context: Context) :
         val result = db.insert(TABLE_HAPPY_PLACE, null, contentValues)
         db.close()
         return result
+    }
+
+    fun getHappyPlaces(): List<HappyPlace> {
+        val happyPlaces = ArrayList<HappyPlace>()
+        val selectSQL = "SELECT * FROM $TABLE_HAPPY_PLACE"
+        val db = this.readableDatabase
+
+        try {
+            val cursor: Cursor = db.rawQuery(selectSQL, null)
+            if (cursor.moveToFirst()) {
+                do {
+                    happyPlaces.add(
+                        HappyPlace(
+                            cursor.getInt(cursor.getColumnIndex(KEY_ID)),
+                            cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
+                            cursor.getString(cursor.getColumnIndex(KEY_IMAGE)),
+                            cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION)),
+                            cursor.getString(cursor.getColumnIndex(KEY_DATE)),
+                            cursor.getString(cursor.getColumnIndex(KEY_LOCATION)),
+                            cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
+                            cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE))
+                        )
+                    )
+                } while (cursor.moveToNext())
+            }
+        } catch (e: SQLiteException) {
+            db.execSQL(selectSQL)
+            return Collections.emptyList()
+        }
+
+        return happyPlaces
     }
 }

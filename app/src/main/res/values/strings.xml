@@ -13,4 +13,5 @@
     <string name="permissionAlertMessage">It looks like you have turned of permissions required for this feature. It can be enabled in application settings</string>
     <string name="goToSettings">GO TO SETTINGS</string>
     <string name="Cancel">Cancel</string>
+    <string name="NoHappyPlacesFound">No happy places found yet</string>
 </resources>

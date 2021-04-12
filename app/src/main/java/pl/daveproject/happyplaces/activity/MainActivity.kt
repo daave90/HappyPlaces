@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -14,6 +15,7 @@ import pl.daveproject.happyplaces.R
 import pl.daveproject.happyplaces.adapter.HappyPlaceAdapter
 import pl.daveproject.happyplaces.database.HappyPlaceDatabaseHandler
 import pl.daveproject.happyplaces.model.HappyPlace
+import pl.daveproject.happyplaces.utils.SwipeToEditCallback
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
-        adapter.setOnClickListener(object: HappyPlaceAdapter.OnClickListener{
+        adapter.setOnClickListener(object : HappyPlaceAdapter.OnClickListener {
             override fun onClick(position: Int, model: HappyPlace) {
                 val intent = Intent(this@MainActivity, HappyPlaceDetailActivity::class.java)
                 intent.putExtra(EXTRA_PLACE_DETAILS, model)
@@ -62,11 +64,24 @@ class MainActivity : AppCompatActivity() {
             }
         })
         recyclerView.adapter = adapter
+
+        val editSwipeHandler = object : SwipeToEditCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                adapter.notifyEditItem(
+                    this@MainActivity,
+                    viewHolder.adapterPosition,
+                    ADD_PLACE_ACTIVITY_REQUEST_CODE
+                )
+            }
+        }
+
+        val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
+        editItemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == ADD_PLACE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == ADD_PLACE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             getHappyPlacesFromLocalDb()
         } else {
             Log.e("Activity", "Cancelled or back pressed")

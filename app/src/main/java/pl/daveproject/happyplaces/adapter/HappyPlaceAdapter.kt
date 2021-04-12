@@ -1,6 +1,8 @@
 package pl.daveproject.happyplaces.adapter
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +11,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hdodenhof.circleimageview.CircleImageView
 import pl.daveproject.happyplaces.R
+import pl.daveproject.happyplaces.activity.AddHappyPlaceActivity
+import pl.daveproject.happyplaces.activity.MainActivity
 import pl.daveproject.happyplaces.model.HappyPlace
 
 open class HappyPlaceAdapter(
@@ -43,6 +47,13 @@ open class HappyPlaceAdapter(
 
     fun setOnClickListener(onClickListener: OnClickListener) {
         this.onClickListener = onClickListener
+    }
+
+    fun notifyEditItem(activity: Activity, position: Int, requestCode: Int) {
+        val intent = Intent(context, AddHappyPlaceActivity::class.java)
+        intent.putExtra(MainActivity.EXTRA_PLACE_DETAILS, list[position])
+        activity.startActivityForResult(intent, requestCode)
+        notifyItemChanged(position)
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

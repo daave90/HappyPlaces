@@ -42,11 +42,12 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var saveImageToInternalStorage: Uri? = null
     private var mLatitude: Double = 0.0
     private var mLongitude: Double = 0.0
+    private var mHappyPlaceDetails: HappyPlace? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_happy_place)
-        createToolbarWithBackButton()
+        createToolbarWithBackButton(null)
 
         dateSetListener = DatePickerDialog
             .OnDateSetListener { view, year, month, dayOfMonth ->
@@ -56,18 +57,41 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 updateDateInView()
             }
 
+        if(intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)) {
+            mHappyPlaceDetails = intent.getParcelableExtra(MainActivity.EXTRA_PLACE_DETAILS)
+        }
+
+        if(mHappyPlaceDetails != null) {
+            createToolbarWithBackButton("Edit Happy Place")
+            findViewById<AppCompatEditText>(R.id.etTitle).setText(mHappyPlaceDetails!!.title)
+            findViewById<AppCompatEditText>(R.id.etDescription).setText(mHappyPlaceDetails!!.description)
+            findViewById<AppCompatEditText>(R.id.etDate).setText(mHappyPlaceDetails!!.date)
+            findViewById<AppCompatEditText>(R.id.etLocation).setText(mHappyPlaceDetails!!.location)
+            mLatitude = mHappyPlaceDetails!!.latitude
+            mLongitude = mHappyPlaceDetails!!.longitude
+
+            saveImageToInternalStorage = Uri.parse(mHappyPlaceDetails!!.image)
+            findViewById<AppCompatImageView>(R.id.iv_place_image).setImageURI(saveImageToInternalStorage)
+            findViewById<Button>(R.id.btn_save).text = "UPDATE"
+        }
+
         findViewById<AppCompatEditText>(R.id.etDate).setOnClickListener(this)
         findViewById<TextView>(R.id.tv_add_image).setOnClickListener(this)
         findViewById<Button>(R.id.btn_save).setOnClickListener(this)
     }
 
-    private fun createToolbarWithBackButton() {
+    private fun createToolbarWithBackButton(title: String?) {
         val toolbar = findViewById<Toolbar>(R.id.toolbar_add_place)
         setSupportActionBar(toolbar)
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
-            actionBar.title = resources.getString(R.string.addHappyPlaceToolbarTitle)
+            if(title == null) {
+                actionBar.title = resources.getString(R.string.addHappyPlaceToolbarTitle)
+            }
+            else {
+                actionBar.title = title
+            }
         }
         toolbar.setNavigationOnClickListener { onBackPressed() }
     }

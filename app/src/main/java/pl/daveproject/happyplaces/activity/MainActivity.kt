@@ -31,15 +31,6 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, ADD_PLACE_ACTIVITY_REQUEST_CODE)
     }
 
-    private fun setupHappyPlacesRecyclerView(happyPlaces: List<HappyPlace>) {
-        val recyclerView = findViewById<RecyclerView>(R.id.rvHappyPlacesList)
-        val adapter = HappyPlaceAdapter(this, happyPlaces)
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
-        recyclerView.setHasFixedSize(true)
-    }
-
     private fun getHappyPlacesFromLocalDb() {
         val dbHandler = HappyPlaceDatabaseHandler(this)
         val happyPlaces = dbHandler.getHappyPlaces()
@@ -55,6 +46,21 @@ class MainActivity : AppCompatActivity() {
             val noRecordsTv = findViewById<TextView>(R.id.tvNoRecordsAvailable)
             noRecordsTv.visibility = View.VISIBLE
         }
+    }
+
+    private fun setupHappyPlacesRecyclerView(happyPlaces: List<HappyPlace>) {
+        val recyclerView = findViewById<RecyclerView>(R.id.rvHappyPlacesList)
+        val adapter = HappyPlaceAdapter(this, happyPlaces)
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.setHasFixedSize(true)
+        adapter.setOnClickListener(object: HappyPlaceAdapter.OnClickListener{
+            override fun onClick(position: Int, model: HappyPlace) {
+                val intent = Intent(this@MainActivity, HappyPlaceDetailActivity::class.java)
+                startActivity(intent)
+            }
+        })
+        recyclerView.adapter = adapter
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

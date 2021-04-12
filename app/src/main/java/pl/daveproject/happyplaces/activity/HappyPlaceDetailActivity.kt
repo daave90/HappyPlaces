@@ -9,6 +9,7 @@ class HappyPlaceDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_happy_place_detail)
+        createToolbarWithBackButton()
     }
 
     private fun createToolbarWithBackButton() {

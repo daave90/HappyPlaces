@@ -57,11 +57,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 updateDateInView()
             }
 
-        if(intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)) {
+        if (intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)) {
             mHappyPlaceDetails = intent.getParcelableExtra(MainActivity.EXTRA_PLACE_DETAILS)
         }
 
-        if(mHappyPlaceDetails != null) {
+        if (mHappyPlaceDetails != null) {
             createToolbarWithBackButton("Edit Happy Place")
             findViewById<AppCompatEditText>(R.id.etTitle).setText(mHappyPlaceDetails!!.title)
             findViewById<AppCompatEditText>(R.id.etDescription).setText(mHappyPlaceDetails!!.description)
@@ -71,7 +71,9 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             mLongitude = mHappyPlaceDetails!!.longitude
 
             saveImageToInternalStorage = Uri.parse(mHappyPlaceDetails!!.image)
-            findViewById<AppCompatImageView>(R.id.iv_place_image).setImageURI(saveImageToInternalStorage)
+            findViewById<AppCompatImageView>(R.id.iv_place_image).setImageURI(
+                saveImageToInternalStorage
+            )
             findViewById<Button>(R.id.btn_save).text = "UPDATE"
         }
 
@@ -86,10 +88,9 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
-            if(title == null) {
+            if (title == null) {
                 actionBar.title = resources.getString(R.string.addHappyPlaceToolbarTitle)
-            }
-            else {
+            } else {
                 actionBar.title = title
             }
         }
@@ -125,7 +126,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             else -> {
                 val happyPlace =
                     HappyPlace(
-                        0,
+                        if (mHappyPlaceDetails == null) 0 else mHappyPlaceDetails!!.id,
                         etTitle.text.toString(),
                         saveImageToInternalStorage.toString(),
                         etDescription.text.toString(),
@@ -136,10 +137,18 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     )
 
                 val dbHandler = HappyPlaceDatabaseHandler(this)
-                val result = dbHandler.addHappyPlace(happyPlace)
-                if(result > 0) {
-                    setResult(Activity.RESULT_OK)
-                    finish()
+                if (mHappyPlaceDetails == null) {
+                    val result = dbHandler.addHappyPlace(happyPlace)
+                    if (result > 0) {
+                        setResult(Activity.RESULT_OK)
+                        finish()
+                    }
+                } else {
+                    val result = dbHandler.updateHappyPlace(happyPlace)
+                    if (result > 0) {
+                        setResult(Activity.RESULT_OK)
+                        finish()
+                    }
                 }
             }
         }

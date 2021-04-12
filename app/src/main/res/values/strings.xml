@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Happy Places</string>
     <string name="addHappyPlaceToolbarTitle">Add Your Happy Place</string>
+    <string name="happyPlaceDetailToolbarTitle">Happy Place Details</string>
     <string name="title_hint">Title</string>
     <string name="description_hint">Description</string>
     <string name="date_hint">Date</string>

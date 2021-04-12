@@ -13,11 +13,12 @@ import de.hdodenhof.circleimageview.CircleImageView
 import pl.daveproject.happyplaces.R
 import pl.daveproject.happyplaces.activity.AddHappyPlaceActivity
 import pl.daveproject.happyplaces.activity.MainActivity
+import pl.daveproject.happyplaces.database.HappyPlaceDatabaseHandler
 import pl.daveproject.happyplaces.model.HappyPlace
 
 open class HappyPlaceAdapter(
     private val context: Context,
-    private var list: List<HappyPlace>
+    private var list: ArrayList<HappyPlace>
 ) : RecyclerView.Adapter<HappyPlaceAdapter.ViewHolder>() {
     private var onClickListener: OnClickListener? = null
 
@@ -54,6 +55,15 @@ open class HappyPlaceAdapter(
         intent.putExtra(MainActivity.EXTRA_PLACE_DETAILS, list[position])
         activity.startActivityForResult(intent, requestCode)
         notifyItemChanged(position)
+    }
+
+    fun notifyRemoveItem(position: Int) {
+        val dbHandler = HappyPlaceDatabaseHandler(context)
+        val deleted = dbHandler.removeHappyPlace(list[position])
+        if(deleted > 0) {
+            list.removeAt(position)
+            notifyItemRemoved(position)
+        }
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

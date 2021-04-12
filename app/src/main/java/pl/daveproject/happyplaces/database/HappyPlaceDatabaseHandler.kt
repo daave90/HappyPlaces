@@ -78,7 +78,7 @@ class HappyPlaceDatabaseHandler(context: Context) :
         return result
     }
 
-    fun getHappyPlaces(): List<HappyPlace> {
+    fun getHappyPlaces(): ArrayList<HappyPlace> {
         val happyPlaces = ArrayList<HappyPlace>()
         val selectSQL = "SELECT * FROM $TABLE_HAPPY_PLACE"
         val db = this.readableDatabase
@@ -103,9 +103,16 @@ class HappyPlaceDatabaseHandler(context: Context) :
             }
         } catch (e: SQLiteException) {
             db.execSQL(selectSQL)
-            return Collections.emptyList()
+            return ArrayList()
         }
 
         return happyPlaces
+    }
+
+    fun removeHappyPlace(happyPlace: HappyPlace): Int {
+        val db = this.writableDatabase
+        val result = db.delete(TABLE_HAPPY_PLACE, KEY_ID + "=" + happyPlace.id, null)
+        db.close()
+        return result
     }
 }

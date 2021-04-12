@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.happyplaces.utils.SwipeToRemoveCallback
 import pl.daveproject.happyplaces.R
 import pl.daveproject.happyplaces.adapter.HappyPlaceAdapter
 import pl.daveproject.happyplaces.database.HappyPlaceDatabaseHandler
@@ -18,6 +19,7 @@ import pl.daveproject.happyplaces.model.HappyPlace
 import pl.daveproject.happyplaces.utils.SwipeToEditCallback
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getHappyPlacesFromLocalDb() {
         val dbHandler = HappyPlaceDatabaseHandler(this)
-        val happyPlaces = dbHandler.getHappyPlaces()
+        val happyPlaces = dbHandler!!.getHappyPlaces()
         if (happyPlaces.isNotEmpty()) {
             val recyclerView = findViewById<RecyclerView>(R.id.rvHappyPlacesList)
             recyclerView.visibility = View.VISIBLE
@@ -50,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupHappyPlacesRecyclerView(happyPlaces: List<HappyPlace>) {
+    private fun setupHappyPlacesRecyclerView(happyPlaces: ArrayList<HappyPlace>) {
         val recyclerView = findViewById<RecyclerView>(R.id.rvHappyPlacesList)
         val adapter = HappyPlaceAdapter(this, happyPlaces)
 
@@ -77,6 +79,15 @@ class MainActivity : AppCompatActivity() {
 
         val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
         editItemTouchHelper.attachToRecyclerView(recyclerView)
+
+        val removeSwipeHandler = object : SwipeToRemoveCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                adapter.notifyRemoveItem(viewHolder.adapterPosition)
+            }
+        }
+
+        val removeItemTouchHelper = ItemTouchHelper(removeSwipeHandler)
+        removeItemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -10,7 +10,7 @@ import pl.daveproject.happyplaces.model.HappyPlace
 import java.util.*
 import kotlin.collections.ArrayList
 
-class DatabaseHandler(context: Context) :
+class HappyPlaceDatabaseHandler(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {

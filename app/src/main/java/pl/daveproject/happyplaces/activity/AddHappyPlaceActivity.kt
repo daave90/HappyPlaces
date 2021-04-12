@@ -28,7 +28,7 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import pl.daveproject.happyplaces.R
-import pl.daveproject.happyplaces.database.DatabaseHandler
+import pl.daveproject.happyplaces.database.HappyPlaceDatabaseHandler
 import pl.daveproject.happyplaces.model.HappyPlace
 import java.io.File
 import java.io.FileOutputStream
@@ -111,13 +111,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                         mLongitude
                     )
 
-                val dbHandler = DatabaseHandler(this)
+                val dbHandler = HappyPlaceDatabaseHandler(this)
                 val result = dbHandler.addHappyPlace(happyPlace)
                 if(result > 0) {
-                    Toast.makeText(this, "Happy place added successfully", Toast.LENGTH_LONG).show()
+                    setResult(Activity.RESULT_OK)
                     finish()
-                } else {
-                    Toast.makeText(this, "Cannot save happy place", Toast.LENGTH_LONG).show()
                 }
             }
         }

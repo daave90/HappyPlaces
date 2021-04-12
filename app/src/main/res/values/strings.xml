@@ -14,4 +14,5 @@
     <string name="goToSettings">GO TO SETTINGS</string>
     <string name="Cancel">Cancel</string>
     <string name="NoHappyPlacesFound">No happy places found yet</string>
+    <string name="image_content_description">Image</string>
 </resources>

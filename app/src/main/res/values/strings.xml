@@ -16,4 +16,5 @@
     <string name="Cancel">Cancel</string>
     <string name="NoHappyPlacesFound">No happy places found yet</string>
     <string name="image_content_description">Image</string>
+    <string name="google_maps_api_key">KEY</string>
 </resources>

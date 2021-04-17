@@ -1,7 +1,9 @@
 package pl.daveproject.happyplaces.activity
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
@@ -41,9 +43,15 @@ class HappyPlaceDetailActivity : AppCompatActivity() {
         val iv_place_image = findViewById<AppCompatImageView>(R.id.iv_place_image)
         val tv_description = findViewById<TextView>(R.id.tv_description)
         val tv_location = findViewById<TextView>(R.id.tv_location)
+        val btn_view_on_map = findViewById<Button>(R.id.btn_view_on_map)
 
         iv_place_image.setImageURI(Uri.parse(happyPlaceDetail.image))
         tv_description.text = happyPlaceDetail.description
         tv_location.text = happyPlaceDetail.location
+        btn_view_on_map.setOnClickListener {
+            val intent = Intent(this, MapActivity::class.java)
+            intent.putExtra(MainActivity.EXTRA_PLACE_DETAILS, happyPlaceDetail)
+            startActivity(intent)
+        }
     }
 }
